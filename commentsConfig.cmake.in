@@ -1,0 +1,9 @@
+@PACKAGE_INIT@
+ include("${CMAKE_CURRENT_LIST_DIR}/CommentsTargets.cmake")
+
+find_dependency(jwt-cpp CONFIG REQUIRED)
+find_dependency(boost_beast CONFIG REQUIRED)
+
+ set_and_check(Comments_INCLUDE_DIR "${PACKAGE_PREFIX_DIR}/include/comments")
+
+ set(Comments_FOUND TRUE)

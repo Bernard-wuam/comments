@@ -72,7 +72,7 @@ inline auto postComments = [](GetRequest &req,
         11, false, makeErrorCode(ServerError::Unauthorize_Access));
   }
 
-  // server.post("/posts/:publicId/comments", PostComments::postComments);
+  // server.post("/posts/:publicId/comments", PostComments::PostComments);
   // get the params id i.e pubblicId;
 
   auto params = req.params(ec);

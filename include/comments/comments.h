@@ -96,7 +96,7 @@ SELECT JSON_ARRAYAGG(
   u.profileImage,
   u.email FROM comments c 
   INNER JOIN users u  
-  ON c.userId = u.userId 
+  ON c.userId = u.userId
   WHERE c.postId = {} ORDER BY  c.createdAt DESC,c.publicId DESC) AS userComment;  
   COMMIT;
         )",
@@ -125,12 +125,12 @@ SELECT JSON_ARRAYAGG(
         11, false, makeErrorCode(ServerError::Server_Failed));
   }
 
-  auto executor = co_await boost::asio::this_coro::executor;
+  // auto executor = co_await boost::asio::this_coro::executor;
 
-  boost::asio::steady_timer t(executor.get_inner_executor(),
-                              std::chrono::seconds(3));
+  // boost::asio::steady_timer t(executor.get_inner_executor(),
+  //                             std::chrono::seconds(3));
 
-  co_await t.async_wait();
+  // co_await t.async_wait();
 
   co_return JsonResponse::sendJsonResponse(11, true, resVal.as_array());
 };

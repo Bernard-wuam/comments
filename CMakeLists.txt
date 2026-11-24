@@ -10,6 +10,8 @@ target_sources(
     FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/comments/commentsid.h
     FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/comments/postcomments.h
     FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/comments/deletecomments.h
+    FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/comments/vote.h
+    FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/comments/postvote.h
 )
 
 # find_package(boost_beast CONFIG REQUIRED)

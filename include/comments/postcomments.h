@@ -40,24 +40,6 @@ inline auto postComments = [](GetRequest &req,
         boost::beast::http::response<boost::beast::http::string_body>,
         boost::asio::strand<boost::asio::io_context::executor_type>> {
   std::error_code ec;
-  auto body = req.body(ec);
-
-  if (ec)
-    co_return JsonResponse::sendJsonBadResponse(
-        11, false, makeErrorCode(ServerError::Convert_Body_To_Object_Failed));
-
-  auto message = body.value()["message"].as_string();
-
-  boost::mysql::error_code ecc;
-  auto connecton =
-      co_await con.async_get_connection(boost::asio::redirect_error(ecc));
-
-  if (ecc) {
-    std::cerr << ecc.what() << std::endl;
-    // log error....
-    co_return JsonResponse::sendJsonBadResponse(
-        11, false, makeErrorCode(ServerError::Server_Failed));
-  }
 
   // check if the request has a Bearer token
   // that is check if the user is authorize to send a comment
@@ -70,6 +52,25 @@ inline auto postComments = [](GetRequest &req,
   if (!jwtToken.has_value()) {
     co_return JsonResponse::sendJsonBadResponse(
         11, false, makeErrorCode(ServerError::Unauthorize_Access));
+  }
+
+  auto body = req.body(ec);
+
+  if (ec)
+    co_return JsonResponse::sendJsonBadResponse(
+        11, false, makeErrorCode(ServerError::Convert_Body_To_Object_Failed));
+
+  auto message = std::string(body.value()["message"].as_string());
+
+  boost::mysql::error_code ecc;
+  auto connecton =
+      co_await con.async_get_connection(boost::asio::redirect_error(ecc));
+
+  if (ecc) {
+    std::cerr << ecc.what() << std::endl;
+    // log error....
+    co_return JsonResponse::sendJsonBadResponse(
+        req.version(), false, makeErrorCode(ServerError::Server_Failed));
   }
 
   // server.post("/posts/:publicId/comments", PostComments::PostComments);
@@ -86,7 +87,8 @@ inline auto postComments = [](GetRequest &req,
 
   auto postPublicId = params.value().at("publicId");
 
-  // userPublicId, is the only value inside the json object
+  // userPublicId, is the only value inside the json object.
+
   auto userPublicId = jwtToken.value().at("userPublicId").as_string();
 
   // check if the user and the post exist in the data base
@@ -113,12 +115,12 @@ inline auto postComments = [](GetRequest &req,
     std::cerr << ecc.what() << " fro.1" << std::endl;
     // log error....
     co_return JsonResponse::sendJsonBadResponse(
-        11, false, makeErrorCode(ServerError::Server_Failed));
+        req.version(), false, makeErrorCode(ServerError::Server_Failed));
   }
 
   if (userIdPublicIdResult.rows<1>().empty()) {
     co_return JsonResponse::sendJsonBadResponse(
-        11, false, makeErrorCode(ServerError::User_Not_Found));
+        req.version(), false, makeErrorCode(ServerError::User_Not_Found));
   }
 
   if (userIdPublicIdResult.rows<2>().empty()) {
@@ -147,14 +149,14 @@ inline auto postComments = [](GetRequest &req,
     std::cerr << ecc.what() << std::endl;
     // log error....
     co_return JsonResponse::sendJsonBadResponse(
-        11, false, makeErrorCode(ServerError::Server_Failed));
+        req.version(), false, makeErrorCode(ServerError::Server_Failed));
   }
 
   if (ecc) {
     std::cerr << ecc.what() << std::endl;
     // log error....
     co_return JsonResponse::sendJsonBadResponse(
-        11, false, makeErrorCode(ServerError::Server_Failed));
+        req.version(), false, makeErrorCode(ServerError::Server_Failed));
   }
 
   // simulate a delay
@@ -167,6 +169,6 @@ inline auto postComments = [](GetRequest &req,
   //   co_await t.async_wait();
 
   co_return JsonResponse::sendJsonResponse(
-      11, true, boost::json::object{{"inserted", "true"}});
+      req.version(), true, boost::json::object{{"inserted", "true"}});
 };
 }; // namespace PostComments
